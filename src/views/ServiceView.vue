@@ -227,7 +227,7 @@ export default {
 
 
                       <!--todos-->
-<template>
+<!-- <template>
   <div class="parent">
     <h1 class="title">User Todos</h1>
 
@@ -332,8 +332,160 @@ export default {
 .pending {
   color: red;
 }
+</style> -->
+
+
+
+            <!--using search to find data from api-->
+<template>
+  <div class="parent">
+    <h1 class="title">User Todos</h1>
+
+    <!-- Main error if fetch fails -->
+    <div v-if="error" class="error">{{ error }}</div>
+
+    <!-- Search input shown only if data is loaded -->
+    <div v-else>
+      <input
+        v-model="searchTerm"
+        type="text"
+        placeholder="Search todos..."
+        class="search-input"
+      />
+
+      <!-- Search error if no match is found -->
+      <div v-if="filteredTodos.length === 0" class="error">
+        No matching todos found.
+      </div>
+
+      <!-- Render filtered todos -->
+      <div class="card-grid">
+        <div class="card" v-for="todo in filteredTodos" :key="todo.id">
+          <h3>{{ todo.id }}. {{ todo.title }}</h3>
+          <p>
+            Status:
+            <strong :class="{ done: todo.completed, pending: !todo.completed }">
+              {{ todo.completed ? "Completed" : "Pending" }}
+            </strong>
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+<script>
+export default {
+  name: "TodoView",
+
+  data() {
+    return {
+      todos: [],
+      error: null,
+      searchTerm: "", // User input
+    };
+  },
+
+  computed: {
+    filteredTodos() {
+      if (!this.searchTerm.trim()) {
+        return this.todos; // No filter
+      }
+
+      return this.todos.filter((todo) =>
+        todo.title.toLowerCase().includes(this.searchTerm.toLowerCase())
+      );
+    },
+  },
+
+  async mounted() {
+    try {
+      const response = await fetch(
+        "https://jsonplaceholder.typicode.com/users/1/todos"
+      );
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      this.todos = data;
+    } catch (err) {
+      console.error(err);
+      this.error = "Failed to fetch todos. Please try again later.";
+    }
+  },
+};
+</script>
+<style scoped>
+.parent {
+  padding: 20px;
+  font-family: Arial, sans-serif;
+}
+
+.title {
+  text-align: center;
+  font-size: 28px;
+  font-weight: bold;
+  margin-bottom: 20px;
+  color: #42b983;
+}
+
+.error {
+  color: #d9534f;
+  background-color: #f2dede;
+  border: 1px solid #ebccd1;
+  padding: 12px;
+  border-radius: 6px;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+.card {
+  border: 1px solid #ddd;
+  background: #fafafa;
+  padding: 15px;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.card h3 {
+  margin: 0 0 10px;
+  color: #333;
+  font-size: 18px;
+}
+
+.card p {
+  margin: 0;
+  font-size: 15px;
+  color: #444;
+}
+
+.done {
+  color: green;
+}
+
+.pending {
+  color: red;
+}
+.search-input {
+  width: 100%;
+  max-width: 400px;
+  padding: 10px;
+  margin: 0 auto 20px auto;
+  display: block;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 16px;
+}
 </style>
-
-
-
 
